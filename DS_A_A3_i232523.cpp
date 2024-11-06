@@ -2,6 +2,9 @@
 #include <cstdlib>
 #include <string>
 #include <fstream>
+#include <sstream>
+
+#include <direct.h>
 
 using namespace std;
 
@@ -18,24 +21,21 @@ int strComp(const string& num1, const string& num2) {
     while (idxJ < num2.length() && num2[idxJ] == '0')
         idxJ++;
 
-    int len1 = num1.length() - idxI;
-    int len2 = num2.length() - idxJ;
-
-    if (len1 < len2)
-        return -1;
-
-    if (len1 > len2)
-        return 1;
-
-    for (int i = 0; i < len1; ++i) {
-        if (num1[idxI + i] < num2[idxJ + i])
+    while (idxI < num1.length() && idxJ < num2.length()) {
+        if (num1[idxI] < num2[idxJ])
             return -1;
 
-        if (num1[idxI + i] > num2[idxJ + i])
+        if (num1[idxI] > num2[idxJ])
             return 1;
+
+        idxI++;
+        idxJ++;
     }
 
-    return 0;
+    if (idxI == num1.length() && idxJ == num2.length())
+        return 0;
+
+    return (idxI < num1.length()) ? 1 : -1;
 }
 
 class GamesPlayedNode {
@@ -60,9 +60,9 @@ public:
 };
 
 class GamesPlayedAVL {
+public:
     GamesPlayedNode* root;
 
-public:
     GamesPlayedAVL() {
         root = nullptr;
     }
@@ -73,28 +73,26 @@ public:
         return node->height;
     }
 
-    GamesPlayedNode *rightRotate(GamesPlayedNode *root) {
-        GamesPlayedNode *node = root->left;
-
-        node->right = root;
-        root->left = node->right;;
+    GamesPlayedNode* rightRotate(GamesPlayedNode* root) {
+        GamesPlayedNode* newRoot = root->left;
+        root->left = newRoot->right;
+        newRoot->right = root;
 
         root->height = 1 + max(height(root->left), height(root->right));
-        node->height = 1 + max(height(node->left), height(node->right));
+        newRoot->height = 1 + max(height(newRoot->left), height(newRoot->right));
 
-        return node;
+        return newRoot;
     }
 
-    GamesPlayedNode *leftRotate(GamesPlayedNode *root) {
-        GamesPlayedNode *node = root->right;
-
-        node->left = root;
-        root->right = node->left;;
+    GamesPlayedNode* leftRotate(GamesPlayedNode* root) {
+        GamesPlayedNode* newRoot = root->right;
+        root->right = newRoot->left;
+        newRoot->left = root;
 
         root->height = 1 + max(height(root->left), height(root->right));
-        node->height = 1 + max(height(node->left), height(node->right));
+        newRoot->height = 1 + max(height(newRoot->left), height(newRoot->right));
 
-        return node;
+        return newRoot;
     }
 
     int getBalance(GamesPlayedNode *node) {
@@ -175,9 +173,9 @@ public:
 };
 
 class PlayerAVL {
+public:
     PlayerNode* root;
 
-public:
     PlayerAVL() {
         root = nullptr;
     }
@@ -188,28 +186,26 @@ public:
         return node->height;
     }
 
-    PlayerNode *rightRotate(PlayerNode *root) {
-        PlayerNode *node = root->left;
-
-        node->right = root;
-        root->left = node->right;;
+    PlayerNode* rightRotate(PlayerNode* root) {
+        PlayerNode* newRoot = root->left;
+        root->left = newRoot->right;
+        newRoot->right = root;
 
         root->height = 1 + max(height(root->left), height(root->right));
-        node->height = 1 + max(height(node->left), height(node->right));
+        newRoot->height = 1 + max(height(newRoot->left), height(newRoot->right));
 
-        return node;
+        return newRoot;
     }
 
-    PlayerNode *leftRotate(PlayerNode *root) {
-        PlayerNode *node = root->right;
-
-        node->left = root;
-        root->right = node->left;;
+    PlayerNode* leftRotate(PlayerNode* root) {
+        PlayerNode* newRoot = root->right;
+        root->right = newRoot->left;
+        newRoot->left = root;
 
         root->height = 1 + max(height(root->left), height(root->right));
-        node->height = 1 + max(height(node->left), height(node->right));
+        newRoot->height = 1 + max(height(newRoot->left), height(newRoot->right));
 
-        return node;
+        return newRoot;
     }
 
     int getBalance(PlayerNode *node) {
@@ -223,8 +219,11 @@ public:
         if (node == nullptr)
             return new PlayerNode(playerID, playerName, phoneNumber, email, password, gamesPlayedRoot);
 
-        if ((strComp(playerID, node->playerID)) == -1)
+        if ((strComp(playerID, node->playerID)) == -1) {
+            //cout << "Inserting playerID: " << playerID << " into node with playerID: " << node->playerID << endl;
+
             node->left = insert(node->left, playerID, playerName, phoneNumber, email, password, gamesPlayedRoot);
+        }
         else if ((strComp(playerID, node->playerID)) == 1)
             node->right = insert(node->right, playerID, playerName, phoneNumber, email, password, gamesPlayedRoot);
         else
@@ -290,9 +289,9 @@ public:
 };
 
 class GameAVL {
+public:
     GameNode* root;
 
-public:
     GameAVL() {
         root = nullptr;
     }
@@ -303,28 +302,26 @@ public:
         return node->height;
     }
 
-    GameNode *rightRotate(GameNode *root) {
-        GameNode *node = root->left;
-
-        node->right = root;
-        root->left = node->right;;
+    GameNode* rightRotate(GameNode* root) {
+        GameNode* newRoot = root->left;
+        root->left = newRoot->right;
+        newRoot->right = root;
 
         root->height = 1 + max(height(root->left), height(root->right));
-        node->height = 1 + max(height(node->left), height(node->right));
+        newRoot->height = 1 + max(height(newRoot->left), height(newRoot->right));
 
-        return node;
+        return newRoot;
     }
 
-    GameNode *leftRotate(GameNode *root) {
-        GameNode *node = root->right;
-
-        node->left = root;
-        root->right = node->left;;
+    GameNode* leftRotate(GameNode* root) {
+        GameNode* newRoot = root->right;
+        root->right = newRoot->left;
+        newRoot->left = root;
 
         root->height = 1 + max(height(root->left), height(root->right));
-        node->height = 1 + max(height(node->left), height(node->right));
+        newRoot->height = 1 + max(height(newRoot->left), height(newRoot->right));
 
-        return node;
+        return newRoot;
     }
 
     int getBalance(GameNode *node) {
@@ -377,50 +374,59 @@ public:
     }
 };
 
+void generatePlayerAVL(PlayerAVL& playerAVL, string& fileName, int seed) {
+    ifstream file(fileName);
+
+    if (!file.is_open()) {
+        cout << "Failed to open file for loading." << endl;;
+        return;
+    }
+
+    string line;
+
+    while (getline(file, line)) {
+        int random = rand() % 1001;
+
+        if (random < ((seed % 100) * 10 + 100))
+            continue;
+
+        string playerID, name, phoneNumber, email, password;
+
+        string gameID;
+        float hoursPlayed;
+        int achievements;
+        GamesPlayedAVL gamePlayedAVL;
+
+        stringstream ss(line);
+
+        getline(ss, playerID, ',');
+        getline(ss, name, ',');
+        getline(ss, phoneNumber, ',');
+        getline(ss, email, ',');
+        getline(ss, password, ',');
+
+        while (getline(ss, gameID, ',')) {
+            ss >> hoursPlayed;
+            ss.ignore(1, ',');
+            ss >> achievements;
+
+            gamePlayedAVL.root = gamePlayedAVL.insert(gamePlayedAVL.root, gameID, hoursPlayed, achievements);
+        }
+
+        playerAVL.root = playerAVL.insert(playerAVL.root, playerID, name, phoneNumber, email, password, gamePlayedAVL.root);
+    }
+
+    file.close();
+}
+
 int main() {
-    // Construct the AVL tree for GameNode
-    AVLTree<GameNode, string> gameTree;
+    int seed = 232523;
+    srand(seed);
 
-    // Sample data for GameNode entries
-    vector<GameNode> games = {
-        GameNode("G001", "Chess", "GameDevCo", "PubCo", 0.5, 10000),
-        GameNode("G002", "Checkers", "GameStudio", "PubInc", 0.4, 8000),
-        GameNode("G003", "TicTacToe", "FunGames", "PubWorld", 0.3, 5000)
-    };
+    PlayerAVL playerAVL;
+    string playerFile = "Players.txt";
 
-    // Insert games into the AVL tree
-    for (const auto& game : games) {
-        gameTree.insert(game.gameID, game);
-    }
-
-    cout << "In-order traversal of GameNode AVL tree:" << endl;
-    gameTree.print();
-
-    // Construct the AVL tree for PlayerNode
-    AVLTree<PlayerNode, string> playerTree;
-
-    // Sample data for GamesPlayedNode entries
-    GamesPlayedNode* gamesPlayedRoot1 = nullptr;
-    AVLTree<GamesPlayedNode, string> gamesPlayedTree1;
-    gamesPlayedTree1.insert("G001", GamesPlayedNode("G001", 10.5, 3));
-    gamesPlayedTree1.insert("G002", GamesPlayedNode("G002", 5.0, 1));
-    gamesPlayedTree1.insert("G003", GamesPlayedNode("G003", 8.2, 2));
-    gamesPlayedRoot1 = gamesPlayedTree1.getRoot();
-
-    // Create PlayerNodes with nested GamesPlayedNode AVL trees
-    vector<PlayerNode> players = {
-        PlayerNode("P001", "Alice", "123456789", "alice@example.com", "password1", gamesPlayedRoot1),
-        PlayerNode("P002", "Bob", "987654321", "bob@example.com", "password2", nullptr),
-        PlayerNode("P003", "Carol", "555555555", "carol@example.com", "password3", nullptr)
-    };
-
-    // Insert players into the AVL tree
-    for (const auto& player : players) {
-        playerTree.insert(player.playerID, player);
-    }
-
-    cout << "In-order traversal of PlayerNode AVL tree:" << endl;
-    playerTree.print();
+    generatePlayerAVL(playerAVL, playerFile, seed);
 
     return 0;
 }
