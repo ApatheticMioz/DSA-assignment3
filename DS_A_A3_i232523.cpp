@@ -138,6 +138,19 @@ public:
         return node;
     }
 
+    GamesPlayedNode* search(GamesPlayedNode* node, const string& gameID) {
+        if (node == nullptr)
+            return nullptr;
+
+        if (node->gameID == gameID)
+            return node;
+
+        if (strComp(gameID, node->gameID) == -1)
+            return search(node->left, gameID);
+
+        return search(node->right, gameID);
+    }
+
     void preOrder(GamesPlayedNode *root) {
         if (root != nullptr) {
             cout << root->gameID << " ";
@@ -256,6 +269,19 @@ public:
         return node;
     }
 
+    PlayerNode* search(PlayerNode* node, const string& playerID) {
+        if (node == nullptr)
+            return nullptr;
+
+        if (node->playerID == playerID)
+            return node;
+
+        if (strComp(playerID, node->playerID) == -1)
+            return search(node->left, playerID);
+
+        return search(node->right, playerID);
+    }
+
     void preOrder(PlayerNode *root) {
         if (root != nullptr) {
             cout << root->playerID << " ";
@@ -369,6 +395,19 @@ public:
         }
 
         return node;
+    }
+
+    GameNode* search(GameNode* node, const string& gameID) {
+        if (node == nullptr)
+            return nullptr;
+
+        if (node->gameID == gameID)
+            return node;
+
+        if (strComp(gameID, node->gameID) == -1)
+            return search(node->left, gameID);
+
+        return search(node->right, gameID);
     }
 
     void preOrder(GameNode *root) {
