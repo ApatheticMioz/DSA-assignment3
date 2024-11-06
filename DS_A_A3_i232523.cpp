@@ -110,8 +110,10 @@ public:
             node->left = insert(node->left, gameID, hoursPlayed, achievements);
         else if ((strComp(gameID, node->gameID)) == 1)
             node->right = insert(node->right, gameID, hoursPlayed, achievements);
-        else
+        else {
+            cout << "Duplicate value entered, not added." << endl;
             return node;
+        }
 
         node->height = 1 + max(height(node->left), height(node->right));
 
@@ -226,8 +228,10 @@ public:
         }
         else if ((strComp(playerID, node->playerID)) == 1)
             node->right = insert(node->right, playerID, playerName, phoneNumber, email, password, gamesPlayedRoot);
-        else
+        else {
+            cout << "Duplicate value entered, not added." << endl;
             return node;
+        }
 
         node->height = 1 + max(height(node->left), height(node->right));
 
@@ -339,8 +343,10 @@ public:
             node->left = insert(node->left, gameID, name, developer, publisher, fileSizeGBs, downloads);
         else if ((strComp(gameID, node->gameID)) == 1)
             node->right = insert(node->right, gameID, name, developer, publisher, fileSizeGBs, downloads);
-        else
+        else {
+            cout << "Duplicate value entered, not added." << endl;
             return node;
+        }
 
         node->height = 1 + max(height(node->left), height(node->right));
 
@@ -419,6 +425,36 @@ void generatePlayerAVL(PlayerAVL& playerAVL, string& fileName, int seed) {
     file.close();
 }
 
+void generateGameAVL(GameAVL& gameAVL, string& fileName) {
+    ifstream file(fileName);
+
+    if (!file.is_open()) {
+        cout << "Failed to open file for loading." << endl;;
+        return;
+    }
+
+    string line;
+
+    while (getline(file, line)) {
+        string gameID, name, developer, publisher;
+        float sizeInGBs;
+        int downloads;
+
+        stringstream ss(line);
+
+        getline(ss, gameID);
+        getline(ss, name);
+        getline(ss, developer);
+        getline(ss, publisher);
+        ss.ignore(1, ',');
+        ss >> sizeInGBs;
+        ss.ignore(1, ',');
+        ss >> downloads;
+
+        gameAVL.root = gameAVL.insert(gameAVL.root, gameID, name, developer, publisher, sizeInGBs, downloads);
+    }
+}
+
 int main() {
     int seed = 232523;
     srand(seed);
@@ -427,6 +463,11 @@ int main() {
     string playerFile = "Players.txt";
 
     generatePlayerAVL(playerAVL, playerFile, seed);
+
+    GameAVL gamesAVL;
+    string gameFile = "Games.txt";
+
+    generateGameAVL(gamesAVL, gameFile);
 
     return 0;
 }
