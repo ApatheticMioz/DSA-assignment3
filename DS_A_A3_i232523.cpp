@@ -282,6 +282,79 @@ public:
         return search(node->right, playerID);
     }
 
+    PlayerNode * minNode(PlayerNode* node) {
+        PlayerNode* current = node;
+
+        while (current->left != nullptr)
+            current = current->left;
+
+        return current;
+    }
+
+    PlayerNode* deleteNode(PlayerNode* root, string& playerID) {
+        if (root == nullptr)
+            return root;
+
+        if (strComp(playerID, root->playerID) == -1)
+            root->left = deleteNode(root->left, playerID);
+        else if (strComp(playerID, root->playerID) == 1)
+            root->right = deleteNode(root->right, playerID);
+        else {
+            if ((root->left == nullptr) || (root->right == nullptr)) {
+                PlayerNode *temp = root->left ? root->left : root->right;
+
+                if (temp == nullptr) {
+                    temp = root;
+                    root = nullptr;
+                } else
+                    *root = *temp;
+
+                delete temp;
+            } else {
+                PlayerNode* temp = minNode(root->right);
+
+                root->playerID = temp->playerID;
+
+                root->right = deleteNode(root->right, temp->playerID);
+            }
+        }
+
+        root->height = 1 + max(height(root->left), height(root->right));
+
+        int balance = getBalance(root);
+
+        if (balance > 1 && getBalance(root->left) >= 0)
+            return rightRotate(root);
+
+        if (balance > 1 && getBalance(root->left) < 0) {
+            root->left = leftRotate(root->left);
+            return rightRotate(root);
+        }
+
+        if (balance < -1 && getBalance(root->right) <= 0)
+            return leftRotate(root);
+
+        if (balance < -1 && getBalance(root->right) > 0) {
+            root->right = rightRotate(root->right);
+            return leftRotate(root);
+        }
+
+        deleteTree(root->gamesPlayedRoot);
+
+        return root;
+    }
+
+    void deleteTree(GamesPlayedNode* rootGames) {
+        if (rootGames == nullptr) {
+            return;
+        }
+
+        deleteTree(rootGames->left);
+        deleteTree(rootGames->right);
+
+        delete rootGames;
+    }
+
     void preOrder(PlayerNode *root) {
         if (root != nullptr) {
             cout << root->playerID << " ";
@@ -408,6 +481,66 @@ public:
             return search(node->left, gameID);
 
         return search(node->right, gameID);
+    }
+
+    GameNode * minNode(GameNode* node) {
+        GameNode* current = node;
+
+        while (current->left != nullptr)
+            current = current->left;
+
+        return current;
+    }
+
+    GameNode* deleteNode(GameNode* root, string& gameID) {
+        if (root == nullptr)
+            return root;
+
+        if (strComp(gameID, root->gameID) == -1)
+            root->left = deleteNode(root->left, gameID);
+        else if (strComp(gameID, root->gameID) == 1)
+            root->right = deleteNode(root->right, gameID);
+        else {
+            if ((root->left == nullptr) || (root->right == nullptr)) {
+                GameNode *temp = root->left ? root->left : root->right;
+
+                if (temp == nullptr) {
+                    temp = root;
+                    root = nullptr;
+                } else
+                    *root = *temp;
+
+                delete temp;
+            } else {
+                GameNode* temp = minNode(root->right);
+
+                root->gameID = temp->gameID;
+
+                root->right = deleteNode(root->right, temp->gameID);
+            }
+        }
+
+        root->height = 1 + max(height(root->left), height(root->right));
+
+        int balance = getBalance(root);
+
+        if (balance > 1 && getBalance(root->left) >= 0)
+            return rightRotate(root);
+
+        if (balance > 1 && getBalance(root->left) < 0) {
+            root->left = leftRotate(root->left);
+            return rightRotate(root);
+        }
+
+        if (balance < -1 && getBalance(root->right) <= 0)
+            return leftRotate(root);
+
+        if (balance < -1 && getBalance(root->right) > 0) {
+            root->right = rightRotate(root->right);
+            return leftRotate(root);
+        }
+
+        return root;
     }
 
     void preOrder(GameNode *root) {
