@@ -4,8 +4,6 @@
 #include <fstream>
 #include <sstream>
 
-#include <direct.h>
-
 using namespace std;
 
 int max(int a, int b) {
@@ -355,6 +353,56 @@ public:
         delete rootGames;
     }
 
+    void saveGamesPlayedInOrder(ofstream& csv, GamesPlayedNode* node) {
+        if (node == nullptr)
+            return;
+
+        saveGamesPlayedInOrder(csv, node->left);
+
+        csv << node->gameID << ',';
+        csv << node->hoursPlayed << ',';
+        csv << node->achievements << ',';
+
+        //cout << node->gameID << ' ' << node->hoursPlayed << ' ' << node->achievements;
+
+        saveGamesPlayedInOrder(csv, node->right);
+    }
+
+    void saveInOrder(ofstream& csv, PlayerNode* node) {
+        if (node == nullptr)
+            return;
+
+        saveInOrder(csv, node->left);
+
+        csv << node->playerID << ",";
+        csv << node->playerName << ",";
+        csv << node->phoneNumber << ",";
+        csv << node->email << ",";
+        csv << node->password << ",";
+
+        //cout << node->playerID << ' ' << node->playerName << ' ' << node->phoneNumber << ' ' << node->email << ' ' << node->password;
+
+        saveGamesPlayedInOrder(csv, node->gamesPlayedRoot);
+
+        csv << '\n';
+        //cout << endl;
+
+        saveInOrder(csv, node->right);
+    }
+
+    void saveToCSV(const string& fileName) {
+        ofstream csv(fileName);
+
+        if (!csv.is_open()) {
+            cout << "Failed to open file for saving." << endl;
+        }
+
+        csv << "playerID,Name,PhoneNumber,Email,Password,GamesPlayed" << endl;
+        saveInOrder(csv, root);
+
+        csv.close();
+    }
+
     void preOrder(PlayerNode *root) {
         if (root != nullptr) {
             cout << root->playerID << " ";
@@ -472,7 +520,7 @@ public:
 
     GameNode* search(GameNode* node, const string& gameID) {
         if (node == nullptr)
-            return nullptr;
+            return node;
 
         if (node->gameID == gameID)
             return node;
@@ -543,6 +591,37 @@ public:
         return root;
     }
 
+    void saveInOrder(ofstream& csv, GameNode* node) {
+        if (node == nullptr)
+            return;
+
+        saveInOrder(csv, node->left);
+
+        csv << node->gameID << ",";
+        csv << node->name << ",";
+        csv << node->developer << ",";
+        csv << node->publisher << ",";
+        csv << node->fileSizeGBs << ",";
+        csv << node->downloads << "\n";
+
+        //cout << node->gameID << ' ' << node->name << ' ' << node->developer << ' ' << node->publisher << ' ' << node->fileSizeGBs << ' ' << node->downloads <<  endl;
+
+        saveInOrder(csv, node->right);
+    }
+
+    void saveToCSV(const string& fileName) {
+        ofstream csv(fileName);
+
+        if (!csv.is_open()) {
+            cout << "Failed to open file for saving." << endl;
+        }
+
+        csv << "gameID,name,developer,publisher,fileSizeGBs,downloads" << endl;
+        saveInOrder(csv, root);
+
+        csv.close();
+    }
+
     void preOrder(GameNode *root) {
         if (root != nullptr) {
             cout << root->gameID << " ";
@@ -570,9 +649,6 @@ void generatePlayerAVL(PlayerAVL& playerAVL, string& fileName, int seed) {
 
         string playerID, name, phoneNumber, email, password;
 
-        string gameID;
-        float hoursPlayed;
-        int achievements;
         GamesPlayedAVL gamePlayedAVL;
 
         stringstream ss(line);
@@ -583,12 +659,25 @@ void generatePlayerAVL(PlayerAVL& playerAVL, string& fileName, int seed) {
         getline(ss, email, ',');
         getline(ss, password, ',');
 
-        while (getline(ss, gameID, ',')) {
-            ss >> hoursPlayed;
+        while (ss.good()) {
+            string gameID;
+            float hoursPlayed;
+            int achievements;
+
+            if (!getline(ss, gameID, ','))
+                break;
+
+            if (!(ss >> hoursPlayed))
+                break;
+
             ss.ignore(1, ',');
-            ss >> achievements;
+
+            if (!(ss >> achievements))
+                break;
 
             gamePlayedAVL.root = gamePlayedAVL.insert(gamePlayedAVL.root, gameID, hoursPlayed, achievements);
+
+            ss.ignore(1, ',');
         }
 
         playerAVL.root = playerAVL.insert(playerAVL.root, playerID, name, phoneNumber, email, password, gamePlayedAVL.root);
@@ -614,17 +703,34 @@ void generateGameAVL(GameAVL& gameAVL, string& fileName) {
 
         stringstream ss(line);
 
-        getline(ss, gameID);
-        getline(ss, name);
-        getline(ss, developer);
-        getline(ss, publisher);
-        ss.ignore(1, ',');
+        getline(ss, gameID, ',');
+        getline(ss, name, ',');
+        getline(ss, developer, ',');
+        getline(ss, publisher, ',');
         ss >> sizeInGBs;
         ss.ignore(1, ',');
         ss >> downloads;
 
         gameAVL.root = gameAVL.insert(gameAVL.root, gameID, name, developer, publisher, sizeInGBs, downloads);
     }
+}
+
+void menu() {
+    cout << "Welcome to the Gamers Database Manager." << endl;
+    cout << endl;
+    cout << "1. Insertion." << endl;
+    cout << "2. Search and Retrieval." << endl;
+    cout << "3. Deletion." << endl;
+    cout << "4. Save data." << endl;
+    cout << "5. Show N Layers." << endl;
+    cout << "6. Show Layer Number." << endl;
+    cout << "7. Show path." << endl;
+    cout << "9. Edit entry. " << endl;
+    cout << "10. Top N players." << endl;
+    cout << "11. Show details." << endl;
+    cout << "12. Has played. " << endl;
+    cout << endl;
+    cout << "Enter your choice: ";
 }
 
 int main() {
@@ -640,6 +746,12 @@ int main() {
     string gameFile = "Games.txt";
 
     generateGameAVL(gamesAVL, gameFile);
+
+    string gameCSV = "Games.csv";
+    gamesAVL.saveToCSV(gameCSV);
+
+    string playerCSV = "Players.csv";
+    playerAVL.saveToCSV(playerCSV);
 
     return 0;
 }
