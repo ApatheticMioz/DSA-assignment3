@@ -311,6 +311,19 @@ public:
         return search(node->right, playerID);
     }
 
+    GamesPlayedNode* search(GamesPlayedNode* node, const string& gameID) {
+        if (node == nullptr)
+            return nullptr;
+
+        if (node->gameID == gameID)
+            return node;
+
+        if (strComp(gameID, node->gameID) == -1)
+            return search(node->left, gameID);
+
+        return search(node->right, gameID);
+    }
+
     PlayerNode * minNode(PlayerNode* node) {
         PlayerNode* current = node;
 
@@ -442,7 +455,7 @@ public:
         }
     }
 
-    void nLayers(PlayerNode* root, int n, int currentLayer = 1, bool limReached = false) {
+    void nLayers(PlayerNode* root, int n, int currentLayer = 1, bool &limReached = *(new bool(false))) {
         if (root == nullptr)
             return;
 
@@ -468,7 +481,7 @@ public:
         while (current) {
             if (playerID == current->playerID) {
                 return layer;
-            } else if (playerID < current->playerID) {
+            } else if (strComp(playerID, current->playerID) == -1) {
                 current = current->left;
             } else {
                 current = current->right;
@@ -489,7 +502,7 @@ public:
         if (root->playerID == playerID)
             return true;
 
-        if (playerID < root->playerID)
+        if (strComp(playerID, root->playerID) == -1)
             return showPath(root->left, playerID);
 
         return showPath(root->right, playerID);
@@ -498,6 +511,49 @@ public:
     void editEntry(PlayerNode*& root, string& oldPlayerID, string& newPlayerID, string& playerName, string& phoneNumber, string& email, string& password, GamesPlayedNode* gamesPlayedRoot) {
         root = deleteNode(root, oldPlayerID);
         root = insert(root, newPlayerID, playerName, phoneNumber, email, password, gamesPlayedRoot);
+    }
+
+    void inOrder(GamesPlayedNode* root) {
+        if (root == nullptr)
+            return;
+
+        inOrder(root->left);
+        cout << "Game ID: " << root->gameID << ' ';
+        cout << "Hours played: " << root->hoursPlayed << ' ';
+        cout << "Achievements: " << root->achievements << endl;
+        inOrder(root->right);
+    }
+
+    void playerDetails(PlayerNode* root, string playerID) {
+        PlayerNode* player = search(root, playerID);
+
+        if (!player) {
+            cout << "Player not found" << endl;
+            return;
+        }
+
+        cout << "Player ID: " << player->playerID << endl;
+        cout << "Player name: " << player->playerName << endl;
+        cout << "Player number: " << player->phoneNumber << endl;
+        cout << "Player email: " << player->email << endl;
+        cout << "Player password: " << player->password << endl;
+
+        cout << "Player games (if any): " << endl;
+        inOrder(player->gamesPlayedRoot);
+    }
+
+    bool hasPlayed(PlayerNode* root, string& playerID, string& gameID) {
+        PlayerNode* player = search(root, playerID);
+
+        if (!player)
+            return false;
+
+        GamesPlayedNode* gamePlayed = search(player->gamesPlayedRoot, gameID);
+
+        if (!gamePlayed)
+            return false;
+
+        return true;
     }
 };
 
@@ -717,6 +773,64 @@ public:
             preOrder(root->left);
             preOrder(root->right);
         }
+    }
+
+    void nLayers(GameNode* root, int n, int currentLayer = 1, bool &limReached = *(new bool(false))) {
+        if (root == nullptr)
+            return;
+
+        if (currentLayer > n) {
+            if (!limReached)
+            {
+                cout << "Layer limit was reached, can't go further." << endl;
+                limReached = true;
+                return;
+            }
+        }
+
+        cout << "Layer " << currentLayer << ": " << root->gameID << endl;
+
+        nLayers(root->left, n, currentLayer + 1, limReached);
+        nLayers(root->right, n, currentLayer + 1, limReached);
+    }
+
+    int layerNumber(GameNode* root, string& gameID) {
+        GameNode* current = root;
+        int layer = 1;
+
+        while (current) {
+            if (gameID == current->gameID) {
+                return layer;
+            } else if (strComp(gameID, current->gameID) == -1) {
+                current = current->left;
+            } else {
+                current = current->right;
+            }
+
+            layer++;
+        }
+
+        return -1;
+    }
+
+    bool showPath(GameNode* root, string& gameID) {
+        if (!root)
+            return false;
+
+        cout << root->gameID << endl;
+
+        if (root->gameID == gameID)
+            return true;
+
+        if (strComp(gameID, root->gameID) == -1)
+            return showPath(root->left, gameID);
+
+        return showPath(root->right, gameID);
+    }
+
+    void editEntry(GameNode*& root, string& oldGameID, string& newGameID, string& name, string& developer, string& publisher, float fileSizeGBs, int downloads) {
+        root = deleteNode(root, oldGameID);
+        root = insert(root, newGameID, name, developer, publisher, fileSizeGBs, downloads);
     }
 };
 
