@@ -6,10 +6,12 @@
 
 using namespace std;
 
+// Find max of two values
 int max(int a, int b) {
     return (a > b) ? a : b;
 }
 
+// Count lines in a file
 int countFileLines(const string &fileName) {
     ifstream file(fileName);
 
@@ -29,6 +31,7 @@ int countFileLines(const string &fileName) {
     return lines;
 }
 
+// Count entries in a csv line
 int countCommas(const string& line) {
     int count = 0;
     stringstream ss(line);
@@ -41,6 +44,7 @@ int countCommas(const string& line) {
     return count/3;
 }
 
+// Compare numerical strings
 int strComp(const string& num1, const string& num2) {
     int idxI = 0, idxJ = 0;
 
@@ -131,7 +135,6 @@ public:
     }
 
     GamesPlayedNode* insert(GamesPlayedNode* node, const string &gameID, const float hoursPlayed, const int achievements) {
-
         if (node == nullptr)
             return new GamesPlayedNode(gameID, hoursPlayed, achievements);
 
@@ -167,6 +170,7 @@ public:
         return node;
     }
 
+    // Return a node if found
     GamesPlayedNode* search(GamesPlayedNode* node, const string& gameID) {
         if (node == nullptr)
             return nullptr;
@@ -259,14 +263,11 @@ public:
     }
 
     PlayerNode* insert(PlayerNode* node, const string &playerID, const string &playerName, const string &phoneNumber, const string &email, const string &password, GamesPlayedNode* gamesPlayedRoot) {
-
         if (node == nullptr)
             return new PlayerNode(playerID, playerName, phoneNumber, email, password, gamesPlayedRoot);
 
         if ((strComp(playerID, node->playerID)) == -1) {
-            //cout << "Inserting playerID: " << playerID << " into node with playerID: " << node->playerID << endl;
-
-            node->left = insert(node->left, playerID, playerName, phoneNumber, email, password, gamesPlayedRoot);
+             node->left = insert(node->left, playerID, playerName, phoneNumber, email, password, gamesPlayedRoot);
         }
         else if ((strComp(playerID, node->playerID)) == 1)
             node->right = insert(node->right, playerID, playerName, phoneNumber, email, password, gamesPlayedRoot);
@@ -298,6 +299,7 @@ public:
         return node;
     }
 
+    // Function to search for a player node
     PlayerNode* search(PlayerNode* node, const string& playerID) {
         if (node == nullptr)
             return nullptr;
@@ -311,6 +313,7 @@ public:
         return search(node->right, playerID);
     }
 
+    // Function to search for a games played node
     GamesPlayedNode* search(GamesPlayedNode* node, const string& gameID) {
         if (node == nullptr)
             return nullptr;
@@ -324,7 +327,7 @@ public:
         return search(node->right, gameID);
     }
 
-    PlayerNode * minNode(PlayerNode* node) {
+    PlayerNode* minNode(PlayerNode* node) {
         PlayerNode* current = node;
 
         while (current->left != nullptr)
@@ -407,8 +410,6 @@ public:
         csv << node->hoursPlayed << ',';
         csv << node->achievements << ',';
 
-        //cout << node->gameID << ' ' << node->hoursPlayed << ' ' << node->achievements;
-
         saveGamesPlayedInOrder(csv, node->right);
     }
 
@@ -424,12 +425,9 @@ public:
         csv << node->email << ",";
         csv << node->password << ",";
 
-        //cout << node->playerID << ' ' << node->playerName << ' ' << node->phoneNumber << ' ' << node->email << ' ' << node->password;
-
         saveGamesPlayedInOrder(csv, node->gamesPlayedRoot);
 
         csv << '\n';
-        //cout << endl;
 
         saveInOrder(csv, node->right);
     }
@@ -455,6 +453,7 @@ public:
         }
     }
 
+    // Show n layers
     void nLayers(PlayerNode* root, int n, int currentLayer = 1, bool &limReached = *(new bool(false))) {
         if (root == nullptr)
             return;
@@ -493,6 +492,7 @@ public:
         return -1;
     }
 
+    // Show pre-order path taken to node
     bool showPath(PlayerNode* root, string& playerID) {
         if (!root)
             return false;
@@ -542,6 +542,7 @@ public:
         inOrder(player->gamesPlayedRoot);
     }
 
+    // Return if a player has played a given game
     bool hasPlayed(PlayerNode* root, string& playerID, string& gameID) {
         PlayerNode* player = search(root, playerID);
 
@@ -627,7 +628,6 @@ public:
     }
 
     GameNode* insert(GameNode* node, const string& gameID, const string& name, const string& developer, const string& publisher, const float fileSizeGBs, int const downloads) {
-
         if (node == nullptr)
             return new GameNode(gameID, name, developer, publisher, fileSizeGBs, downloads);
 
@@ -676,7 +676,7 @@ public:
         return search(node->right, gameID);
     }
 
-    GameNode * minNode(GameNode* node) {
+    GameNode* minNode(GameNode* node) {
         GameNode* current = node;
 
         while (current->left != nullptr)
@@ -749,8 +749,6 @@ public:
         csv << node->fileSizeGBs << ",";
         csv << node->downloads << "\n";
 
-        //cout << node->gameID << ' ' << node->name << ' ' << node->developer << ' ' << node->publisher << ' ' << node->fileSizeGBs << ' ' << node->downloads <<  endl;
-
         saveInOrder(csv, node->right);
     }
 
@@ -775,6 +773,7 @@ public:
         }
     }
 
+    // Show N layers
     void nLayers(GameNode* root, int n, int currentLayer = 1, bool &limReached = *(new bool(false))) {
         if (root == nullptr)
             return;
@@ -813,6 +812,7 @@ public:
         return -1;
     }
 
+    // Show pre-order path taken to node
     bool showPath(GameNode* root, string& gameID) {
         if (!root)
             return false;
@@ -834,6 +834,7 @@ public:
     }
 };
 
+// Open the file, and generate an AVL tree for Players from it
 void generatePlayerAVL(PlayerAVL& playerAVL, string& fileName, int seed) {
     ifstream file(fileName);
 
@@ -889,6 +890,7 @@ void generatePlayerAVL(PlayerAVL& playerAVL, string& fileName, int seed) {
     file.close();
 }
 
+// Generate the AVL tree built by recursively going through an array
 GamesPlayedNode* generateGamesPlayedAVL_Array(GamesPlayedNode** gamesArray, int start, int end) {
     if (start > end) {
         return nullptr;
@@ -903,6 +905,7 @@ GamesPlayedNode* generateGamesPlayedAVL_Array(GamesPlayedNode** gamesArray, int 
     return root;
 }
 
+// Generat games played AVL tree
 GamesPlayedNode* generateGamesPlayedAVL_CSV(const string& line) {
     stringstream ss(line);
     string temp;
@@ -911,10 +914,7 @@ GamesPlayedNode* generateGamesPlayedAVL_CSV(const string& line) {
         getline(ss, temp, ',');
     }
 
-
-
     int gamesCount = countCommas(ss.str()) - 1;
-    //cout << gamesCount << endl;
     auto** array = new GamesPlayedNode*[gamesCount];
 
     int index = 0;
@@ -935,18 +935,15 @@ GamesPlayedNode* generateGamesPlayedAVL_CSV(const string& line) {
         if (!(ss >> achievements))
             break;
 
-        //cout << gameID << ' ' << hoursPlayed << ' ' << achievements << endl;
-
         array[index++] = new GamesPlayedNode(gameID, hoursPlayed, achievements);
 
         ss.ignore(1, ',');
     }
 
-    //cout << "Games played array" << endl;
-
     return generateGamesPlayedAVL_Array(array, 0, gamesCount - 1);
 }
 
+// Generate player array
 void generatePlayerArray_CSV(string& fileName, PlayerNode**& playerArray, int& playerCount) {
     playerCount = countFileLines(fileName) - 1;
     playerArray = new PlayerNode*[playerCount];
@@ -972,16 +969,14 @@ void generatePlayerArray_CSV(string& fileName, PlayerNode**& playerArray, int& p
         GamesPlayedAVL gamesPlayedAVL;
 
         gamesPlayedAVL.root = generateGamesPlayedAVL_CSV(ss.str());
-        //cout << "Returned" << endl;
 
         playerArray[index++] = new PlayerNode(playerID, playerName, phoneNumber, email, password, gamesPlayedAVL.root);
     }
 
-    //cout << "Array generated" << endl;
-
     csv.close();
 }
 
+// Generate AVL tree by recursively processing array
 PlayerNode* generatePlayerAVL_Array(PlayerNode** gamesArray, int start, int end) {
     if (start > end) {
         return nullptr;
@@ -996,6 +991,7 @@ PlayerNode* generatePlayerAVL_Array(PlayerNode** gamesArray, int start, int end)
     return root;
 }
 
+// Generate player AVL tree
 void generatePlayerAVL_CSV(PlayerAVL& gameAVL, string& fileName) {
     int gamesCount;
     PlayerNode** playerArray = nullptr;
@@ -1010,6 +1006,7 @@ void generatePlayerAVL_CSV(PlayerAVL& gameAVL, string& fileName) {
     delete[] playerArray;
 }
 
+// Generate game array
 void generateGameArray_CSV(string& fileName, GameNode**& gamesArray, int& gamesCount) {
     gamesCount = countFileLines(fileName) - 1;
     gamesArray = new GameNode*[gamesCount];
@@ -1042,6 +1039,7 @@ void generateGameArray_CSV(string& fileName, GameNode**& gamesArray, int& gamesC
     csv.close();
 }
 
+// Generate game AVL tree by recursion of array
 GameNode* generateGameAVL_Array(GameNode** gamesArray, int start, int end) {
     if (start > end) {
         return nullptr;
@@ -1056,6 +1054,7 @@ GameNode* generateGameAVL_Array(GameNode** gamesArray, int start, int end) {
     return root;
 }
 
+// Generate game AVL tree
 void generateGameAVL_CSV(GameAVL& gameAVL, string& fileName) {
     int gamesCount;
     GameNode** gamesArray = nullptr;
@@ -1070,6 +1069,7 @@ void generateGameAVL_CSV(GameAVL& gameAVL, string& fileName) {
     delete[] gamesArray;
 }
 
+// Read and create the initial game AVL tree
 void generateGameAVL(GameAVL& gameAVL, string& fileName) {
     ifstream file(fileName);
 
@@ -1101,27 +1101,27 @@ void generateGameAVL(GameAVL& gameAVL, string& fileName) {
     file.close();
 }
 
-void menu() {
-    cout << "Welcome to the Gamers Database Manager." << endl;
-    cout << endl;
-    cout << "1. Insertion." << endl;
-    cout << "2. Search and Retrieval." << endl;
-    cout << "3. Deletion." << endl;
-    cout << "4. Save data." << endl;
-    cout << "5. Show N Layers." << endl;
-    cout << "6. Show Layer Number." << endl;
-    cout << "7. Show path." << endl;
-    cout << "9. Edit entry. " << endl;
-    cout << "10. Top N players." << endl;
-    cout << "11. Show details." << endl;
-    cout << "12. Has played. " << endl;
-    cout << endl;
-    cout << "Enter your choice: ";
+// Save the data to csv files, and then load it back
+void saveData(GameAVL &gamesAVL, PlayerAVL &playerAVL) {
+    string gameCSV = "Games.csv";
+    gamesAVL.saveToCSV(gameCSV);
+    cout << "Games saved." << endl;
+
+    string playerCSV = "Players.csv";
+    playerAVL.saveToCSV(playerCSV);
+    cout << "Players saved." << endl;
+
+    cout << "Reloading from hard disk." << endl;
+    generateGameAVL_CSV(gamesAVL, gameCSV);
+    generatePlayerAVL_CSV(playerAVL, playerCSV);
+    cout << "Both trees loaded." << endl;
 }
 
 int main() {
     int seed = 232523;
     srand(seed);
+
+    // 1.1 Loading Memory
 
     PlayerAVL playerAVL;
     string playerFile = "Players.txt";
@@ -1133,24 +1133,281 @@ int main() {
 
     generateGameAVL(gamesAVL, gameFile);
 
-    string gameCSV = "Games.csv";
-    gamesAVL.saveToCSV(gameCSV);
-    cout << "Games saved." << endl;
-    //gamesAVL.preOrder(gamesAVL.root);
+    // 1.2 Insertion
 
-    string playerCSV = "Players.csv";
-    playerAVL.saveToCSV(playerCSV);
-    cout << "Players saved." << endl;
-    cout << "Reloading from hard disk." << endl;
+    string playerID, playerName, phoneNumber, email, password;
+    string gameID;
+    float hoursPlayed;
+    int achievements;
 
-    generateGameAVL_CSV(gamesAVL, gameCSV);
-    //gamesAVL.preOrder(gamesAVL.root);
+    cout << "Enter values for player: \n";
+    cout << "Player ID: ";
+    cin >> playerID;
+    cout << "Player name: ";
+    cin >> playerName;
+    cout << "Phone number: ";
+    cin >> phoneNumber;
+    cout << "Email: ";
+    cin >> email;
+    cout << "Password: ";
+    cin >> password;
 
-    PlayerAVL temp;
-    generatePlayerAVL_CSV(temp, playerCSV);
-    string tempPlayers = "tempPlayers.csv";
-    temp.saveToCSV(tempPlayers);
+    int gamesCount;
+    cout << "Enter number of games: ";
+    cin >> gamesCount;
 
+    GamesPlayedAVL gamesPlayedAVL;
+
+    for (int i = 0; i < gamesCount; i++) {
+        cout << "Game #" << i + 1 << ": ";
+        cout << "Game ID: ";
+        cin >> gameID;
+        cout << "Hours played: ";
+        cin >> hoursPlayed;
+        cout << "Achievements: ";
+        cin >> achievements;
+
+        gamesPlayedAVL.root = gamesPlayedAVL.insert(gamesPlayedAVL.root, gameID, hoursPlayed, achievements);
+    }
+
+    playerAVL.root = playerAVL.insert(playerAVL.root, playerID, playerName, phoneNumber, email, password, gamesPlayedAVL.root);
+    saveData(gamesAVL, playerAVL);
+
+    string name, developer, publisher;
+    float fileSizeInGBs;
+    int downloads;
+    cout << "Enter value for game: " << endl;
+    cout << "Game ID: ";
+    cin >> gameID;
+    cout << "Name: ";
+    cin >> name;
+    cout << "Developer: ";
+    cin >> developer;
+    cout << "Publisher: ";
+    cin >> publisher;
+    cout << "File size: ";
+    cin >> fileSizeInGBs;
+    cout << "Downloads: ";
+    cin >> downloads;
+
+    gamesAVL.root = gamesAVL.insert(gamesAVL.root, gameID, name, developer, publisher, fileSizeInGBs, downloads);
+    saveData(gamesAVL, playerAVL);
+
+    // 1.3 Search and Retrieval
+
+    cout << "Enter player ID to search/retrieve: ";
+    cin >> playerID;
+
+    PlayerNode* player = playerAVL.search(playerAVL.root, playerID);
+
+    if (player == nullptr) {
+        cout << "There is no player found." << endl;
+    } else {
+        cout << "Player found." << endl;
+        playerAVL.playerDetails(playerAVL.root, playerID);
+
+        string newPlayerID;
+
+        cout << "Enter values for player modification: ";
+        cout << "Player ID: ";
+        cin >> newPlayerID;
+        cout << "Player name: ";
+        cin >> playerName;
+        cout << "Phone number: ";
+        cin >> phoneNumber;
+        cout << "Email: ";
+        cin >> email;
+        cout << "Password: ";
+        cin >> password;
+
+        cout << "Enter number of games: ";
+        cin >> gamesCount;
+
+        for (int i = 0; i < gamesCount; i++) {
+            cout << "Game #" << i + 1 << ": ";
+            cout << "Game ID: ";
+            cin >> gameID;
+            cout << "Hours played: ";
+            cin >> hoursPlayed;
+            cout << "Achievements: ";
+            cin >> achievements;
+
+            gamesPlayedAVL.root = gamesPlayedAVL.insert(gamesPlayedAVL.root, gameID, hoursPlayed, achievements);
+        }
+
+        playerAVL.editEntry(playerAVL.root, playerID, newPlayerID, playerName, phoneNumber, email, password, gamesPlayedAVL.root);
+        saveData(gamesAVL, playerAVL);
+    }
+
+    cout << "Enter game ID to search/retrieve: ";
+    cin >> gameID;
+
+    GameNode* game = gamesAVL.search(gamesAVL.root, gameID);
+
+    if (game == nullptr) {
+        cout << "There is no game found." << endl;
+    } else {
+        cout << "Game found." << endl;
+        cout << game->name << endl;
+        cout << game->gameID << endl;
+        cout << game->downloads << endl;
+        cout << game->publisher << endl;
+        cout << game->fileSizeGBs << endl;
+        cout << game->developer << endl;
+
+        cout << "Enter value for game modification: " << endl;
+        string newGameID;
+        cout << "Game ID: ";
+        cin >> newGameID;
+        cout << "Name: ";
+        cin >> name;
+        cout << "Developer: ";
+        cin >> developer;
+        cout << "Publisher: ";
+        cin >> publisher;
+        cout << "File size: ";
+        cin >> fileSizeInGBs;
+        cout << "Downloads: ";
+        cin >> downloads;
+
+        gamesAVL.editEntry(gamesAVL.root, gameID, newGameID, name, developer, publisher, fileSizeInGBs, downloads);
+        saveData(gamesAVL, playerAVL);
+    }
+
+    // 1.4 Deletion
+
+    string playerToDelete, gameToDelete;
+
+    cout << "Enter player ID to delete: ";
+    cin >> playerToDelete;
+
+    playerAVL.deleteNode(playerAVL.root, playerToDelete);
+    saveData(gamesAVL, playerAVL);
+
+    cout << "Enter game ID to delete: ";
+    cin >> gameToDelete;
+
+    gamesAVL.deleteNode(gamesAVL.root, gameToDelete);
+    saveData(gamesAVL, playerAVL);
+
+    // 1.5 Save Data
+
+    saveData(gamesAVL, playerAVL);
+
+    // 1.6 Show N layers
+
+    int n;
+
+    cout << "How many layers to show for player tree? ";
+    cin >> n;
+
+    playerAVL.nLayers(playerAVL.root, n);
+
+    cout << "How many for games? ";
+    cin >> n;
+
+    gamesAVL.nLayers(gamesAVL.root, n);
+
+    // 1.7 Show Layer Number
+
+    cout << "Enter player ID to show layer number for: " << endl;
+    cin >> playerID;
+
+    playerAVL.layerNumber(playerAVL.root, playerID);
+
+    cout << "Enter game ID to show layer number for: " << endl;
+    cin >> gameID;
+
+    gamesAVL.layerNumber(gamesAVL.root, gameID);
+
+    // 1.8 Show path
+
+    cout << "Enter player ID to show path for: " << endl;
+    cin >> playerID;
+
+    playerAVL.showPath(playerAVL.root, playerID);
+
+    cout << "Enter game ID to show path for: " << endl;
+    cin >> gameID;
+
+    gamesAVL.showPath(gamesAVL.root, gameID);
+
+    // 1.9 Edit entry
+
+    string newPlayerID;
+    cout << "Enter values for player modification: ";
+    cout << "Player ID: ";
+    cin >> newPlayerID;
+    cout << "Player name: ";
+    cin >> playerName;
+    cout << "Phone number: ";
+    cin >> phoneNumber;
+    cout << "Email: ";
+    cin >> email;
+    cout << "Password: ";
+    cin >> password;
+
+    cout << "Enter number of games: ";
+    cin >> gamesCount;
+
+    for (int i = 0; i < gamesCount; i++) {
+        cout << "Game #" << i + 1 << ": ";
+        cout << "Game ID: ";
+        cin >> gameID;
+        cout << "Hours played: ";
+        cin >> hoursPlayed;
+        cout << "Achievements: ";
+        cin >> achievements;
+
+        gamesPlayedAVL.root = gamesPlayedAVL.insert(gamesPlayedAVL.root, gameID, hoursPlayed, achievements);
+    }
+
+    playerAVL.editEntry(playerAVL.root, playerID, newPlayerID, playerName, phoneNumber, email, password, gamesPlayedAVL.root);
+    saveData(gamesAVL, playerAVL);
+
+    cout << "Enter value for game modification: " << endl;
+    string newGameID;
+    cout << "Game ID: ";
+    cin >> newGameID;
+    cout << "Name: ";
+    cin >> name;
+    cout << "Developer: ";
+    cin >> developer;
+    cout << "Publisher: ";
+    cin >> publisher;
+    cout << "File size: ";
+    cin >> fileSizeInGBs;
+    cout << "Downloads: ";
+    cin >> downloads;
+
+    gamesAVL.editEntry(gamesAVL.root, gameID, newGameID, name, developer, publisher, fileSizeInGBs, downloads);
+    saveData(gamesAVL, playerAVL);
+
+    // 1.10 Top N Players
+
+    // Not implemented
+
+    // 1.11 Show details
+
+    cout << "Enter player to show details for: " << endl;
+    string playerToShow;
+    cin >> playerToShow;
+
+    playerAVL.playerDetails(playerAVL.root, playerToShow);
+
+    // 1.12 Has Played
+
+    cout << "Enter player ID and game ID to see if a player has played game: ";
+    cout << "Player ID: ";
+    cin >> playerID;
+    cout << "Game ID: ";
+    cin >> gameID;
+
+    if (playerAVL.hasPlayed(playerAVL.root, playerID, gameID)) {
+        cout << "Player has played the game" << endl;
+    } else {
+        cout << "Player has not played the game" << endl;
+    }
 
     return 0;
 }
