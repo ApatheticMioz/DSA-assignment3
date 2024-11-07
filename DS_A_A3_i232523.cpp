@@ -29,6 +29,18 @@ int countFileLines(const string &fileName) {
     return lines;
 }
 
+int countCommas(const string& line) {
+    int count = 0;
+    stringstream ss(line);
+    string entry;
+
+    while (getline(ss, entry, ',')) {
+        count++;
+    }
+
+    return count/3;
+}
+
 int strComp(const string& num1, const string& num2) {
     int idxI = 0, idxJ = 0;
 
@@ -705,6 +717,127 @@ void generatePlayerAVL(PlayerAVL& playerAVL, string& fileName, int seed) {
     file.close();
 }
 
+GamesPlayedNode* generateGamesPlayedAVL_Array(GamesPlayedNode** gamesArray, int start, int end) {
+    if (start > end) {
+        return nullptr;
+    }
+
+    int mid = start + (end - start) / 2;
+    GamesPlayedNode* root = gamesArray[mid];
+
+    root->left = generateGamesPlayedAVL_Array(gamesArray, start, mid - 1);
+    root->right = generateGamesPlayedAVL_Array(gamesArray, mid + 1, end);
+
+    return root;
+}
+
+GamesPlayedNode* generateGamesPlayedAVL_CSV(const string& line) {
+    stringstream ss(line);
+    string temp;
+
+    for (int i = 0; i < 5; i++) {
+        getline(ss, temp, ',');
+    }
+
+
+
+    int gamesCount = countCommas(ss.str()) - 1;
+    //cout << gamesCount << endl;
+    auto** array = new GamesPlayedNode*[gamesCount];
+
+    int index = 0;
+
+    while (ss.good()) {
+        string gameID;
+        float hoursPlayed;
+        int achievements;
+
+        if (!getline(ss, gameID, ','))
+            break;
+
+        if (!(ss >> hoursPlayed))
+            break;
+
+        ss.ignore(1, ',');
+
+        if (!(ss >> achievements))
+            break;
+
+        //cout << gameID << ' ' << hoursPlayed << ' ' << achievements << endl;
+
+        array[index++] = new GamesPlayedNode(gameID, hoursPlayed, achievements);
+
+        ss.ignore(1, ',');
+    }
+
+    //cout << "Games played array" << endl;
+
+    return generateGamesPlayedAVL_Array(array, 0, gamesCount - 1);
+}
+
+void generatePlayerArray_CSV(string& fileName, PlayerNode**& playerArray, int& playerCount) {
+    playerCount = countFileLines(fileName) - 1;
+    playerArray = new PlayerNode*[playerCount];
+
+    ifstream csv(fileName);
+    string line;
+
+    getline(csv, line);
+
+    int index = 0;
+
+    while (getline(csv, line) && index < playerCount) {
+        stringstream ss(line);
+
+        string playerID, playerName, phoneNumber, email, password;
+
+        getline(ss, playerID, ',');
+        getline(ss, playerName, ',');
+        getline(ss, phoneNumber, ',');
+        getline(ss, email, ',');
+        getline(ss, password, ',');
+
+        GamesPlayedAVL gamesPlayedAVL;
+
+        gamesPlayedAVL.root = generateGamesPlayedAVL_CSV(ss.str());
+        //cout << "Returned" << endl;
+
+        playerArray[index++] = new PlayerNode(playerID, playerName, phoneNumber, email, password, gamesPlayedAVL.root);
+    }
+
+    //cout << "Array generated" << endl;
+
+    csv.close();
+}
+
+PlayerNode* generatePlayerAVL_Array(PlayerNode** gamesArray, int start, int end) {
+    if (start > end) {
+        return nullptr;
+    }
+
+    int mid = start + (end - start) / 2;
+    PlayerNode* root = gamesArray[mid];
+
+    root->left = generatePlayerAVL_Array(gamesArray, start, mid - 1);
+    root->right = generatePlayerAVL_Array(gamesArray, mid + 1, end);
+
+    return root;
+}
+
+void generatePlayerAVL_CSV(PlayerAVL& gameAVL, string& fileName) {
+    int gamesCount;
+    PlayerNode** playerArray = nullptr;
+
+    generatePlayerArray_CSV(fileName, playerArray, gamesCount);
+
+    gameAVL.root = generatePlayerAVL_Array(playerArray, 0, gamesCount - 1);
+
+    for (int i = 0; i < gamesCount; ++i) {
+        delete playerArray[i];
+    }
+    delete[] playerArray;
+}
+
 void generateGameArray_CSV(string& fileName, GameNode**& gamesArray, int& gamesCount) {
     gamesCount = countFileLines(fileName) - 1;
     gamesArray = new GameNode*[gamesCount];
@@ -713,7 +846,6 @@ void generateGameArray_CSV(string& fileName, GameNode**& gamesArray, int& gamesC
     string line;
 
     getline(csv, line);
-    //cout << gamesCount << endl;
 
     int index = 0;
 
@@ -732,12 +864,8 @@ void generateGameArray_CSV(string& fileName, GameNode**& gamesArray, int& gamesC
         ss.ignore(1, ',');
         ss >> downloads;
 
-        //cout << gameID << ' ' << name << ' ' << developer << ' ' << publisher << ' ' << sizeInGBs << ' ' << downloads << endl;
-
         gamesArray[index++] = new GameNode(gameID, name, developer, publisher, sizeInGBs, downloads);
     }
-
-    //cout << "Array built" << endl;
 
     csv.close();
 }
@@ -841,11 +969,16 @@ int main() {
     string playerCSV = "Players.csv";
     playerAVL.saveToCSV(playerCSV);
     cout << "Players saved." << endl;
-
     cout << "Reloading from hard disk." << endl;
 
     generateGameAVL_CSV(gamesAVL, gameCSV);
     //gamesAVL.preOrder(gamesAVL.root);
+
+    PlayerAVL temp;
+    generatePlayerAVL_CSV(temp, playerCSV);
+    string tempPlayers = "tempPlayers.csv";
+    temp.saveToCSV(tempPlayers);
+
 
     return 0;
 }
