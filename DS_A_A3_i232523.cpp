@@ -441,6 +441,64 @@ public:
             preOrder(root->right);
         }
     }
+
+    void nLayers(PlayerNode* root, int n, int currentLayer = 1, bool limReached = false) {
+        if (root == nullptr)
+            return;
+
+        if (currentLayer > n) {
+            if (!limReached)
+            {
+                cout << "Layer limit was reached, can't go further." << endl;
+                limReached = true;
+                return;
+            }
+        }
+
+        cout << "Layer " << currentLayer << ": " << root->playerID << endl;
+
+        nLayers(root->left, n, currentLayer + 1, limReached);
+        nLayers(root->right, n, currentLayer + 1, limReached);
+    }
+
+    int layerNumber(PlayerNode* root, string& playerID) {
+        PlayerNode* current = root;
+        int layer = 1;
+
+        while (current) {
+            if (playerID == current->playerID) {
+                return layer;
+            } else if (playerID < current->playerID) {
+                current = current->left;
+            } else {
+                current = current->right;
+            }
+
+            layer++;
+        }
+
+        return -1;
+    }
+
+    bool showPath(PlayerNode* root, string& playerID) {
+        if (!root)
+            return false;
+
+        cout << root->playerID << endl;
+
+        if (root->playerID == playerID)
+            return true;
+
+        if (playerID < root->playerID)
+            return showPath(root->left, playerID);
+
+        return showPath(root->right, playerID);
+    }
+
+    void editEntry(PlayerNode*& root, string& oldPlayerID, string& newPlayerID, string& playerName, string& phoneNumber, string& email, string& password, GamesPlayedNode* gamesPlayedRoot) {
+        root = deleteNode(root, oldPlayerID);
+        root = insert(root, newPlayerID, playerName, phoneNumber, email, password, gamesPlayedRoot);
+    }
 };
 
 class GameNode {
