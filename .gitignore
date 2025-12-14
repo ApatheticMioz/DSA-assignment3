@@ -1,0 +1,53 @@
+# Compiled binaries
+*.exe
+*.out
+*.o
+*.a
+*.so
+*.dll
+main
+app
+
+# Build directories
+build/
+dist/
+bin/
+obj/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.cproject
+.settings/
+
+# System files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Data files (generated at runtime)
+*.csv
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Dependency directories
+node_modules/
+vendor/
+venv/
+__pycache__/
+
+# CodeQL artifacts
+_codeql_detected_source_root
